@@ -1,7 +1,9 @@
 *.pyc
 
+.local/
 .vscode/
 
-playstationpresence.ini
-
 build/
+game_icons/
+
+__pycache__/
