@@ -1,0 +1,6 @@
+{
+    "discordClientId": "<your-discord-app-id>",
+    "discordToken": "<your-discord-token>",
+    "npsso": "<your-sony-sso-token>",
+    "PSNID": "<your-psn-id>"
+}

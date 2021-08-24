@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Adapted from https://github.com/Tustin/PlayStationDiscord-Games/blob/master/discord_push.py
 import json, base64
 from discord_assets import AssetClient
 
