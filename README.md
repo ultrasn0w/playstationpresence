@@ -40,7 +40,7 @@ you might want to pick something like "PlayStation".
 4. Get a valid Discord token. There are a number of guides/ways to do this but one way that should generally
 work is to log into the [Discord web app](https://discord.com/app), open your browser's dev console, and then
 look in the Applications -> Local Storage view for a field named "token".
-5. Once you have your data, create a config file at `{repositoryRoot}/.local/config.json`, following the format
+5. Once you have your data, create a config file at `{repositoryRoot}/.local/config.yaml`, following the format
 in the sample file and replace the values with your own.
 6. Run `asset_updater.py login`, `asset_updater.py generate`, and `asset_updater.py push`. If everything goes
 well then you should see a bunch of assets in your Discord app.
