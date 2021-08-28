@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import asyncio
-import json
 import os
 import time
 import winstray
+import yaml
 from psnawp_api import psnawp
 from pypresence import Presence
 from winstray import MenuItem as item
@@ -38,7 +38,7 @@ def updateStatus(rpc: Presence, tray_icon: Icon, state: str, psnid: str, large_i
 
 def mainloop(icon: Icon):
     old_info: dict = {}
-    config: dict[str, str] = json.load(open("../.local/config.json", "r"))
+    config: dict = yaml.safe_load(open("../.local/config.yaml", "r"))
     npsso = config['npsso']
     psnid = config['PSNID']
     ps = psnawp.PSNAWP(npsso)

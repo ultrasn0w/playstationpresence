@@ -6,24 +6,25 @@ import requests
 import shutil
 import sys
 import time
+import yaml
 
 from discord_push import push_assets
 from urllib.parse import urlparse, parse_qs
 
-icon_dir = "game_icons"
+icon_dir = ".local/game_icons"
 ps_graph_api = "https://web.np.playstation.com/api/graphql/v1/op"
 
 # Anything we don't care to push assets for (e.g. streaming apps, artbooks, etc)
 # since the library page doesn't seem to let us filter out non-games and such.
-ignored_titles = [
-    "CUSA15607_00", # Disney+
-    "CUSA05223_00", # HBO Max
-    "CUSA07553_00", # The Art of Horizon Zero Dawn
-    "CUSA25105_00", # Persona 5 Strikers Bonus Content
-    "CUSA01780_00"  # Spotify
-]
+def load_config():
+    with open("../.local/config.yaml", 'r') as f:
+        return yaml.safe_load(f)
 
-def get_purchased_games():
+def save_config(config):
+    with open("../.local/config.yaml", 'w+') as f:
+        yaml.dump(config, f)
+
+def get_purchased_games(config):
     variables = {
         "isActive": True,
         "platform": [ "ps4","ps5" ],
@@ -45,7 +46,7 @@ def get_purchased_games():
         'accept': 'application/json',
         'accept-language': 'en-US,en;q=0.9',
         'authority': 'web.np.playstation.com',
-        'authorization': f'Bearer {get_access_token()}',
+        'authorization': f'Bearer {get_access_token(config)}',
         'content-type': 'application/json',
         'origin': 'https://library.playstation.com',
         'referer': 'https://library.playstation.com/',
@@ -118,10 +119,7 @@ def get_refresh_token(oauth_code, config):
     config["refresh_token"] = j["refresh_token"]
     config["refresh_token_expires_in"] = time.time() + j["refresh_token_expires_in"]
 
-def get_access_token():
-    config = {}
-    with open("../.local/config.json", 'r') as f:
-        config = json.load(f)
+def get_access_token(config):
 
     data = {
         'refresh_token': config["refresh_token"],
@@ -138,10 +136,11 @@ def get_access_token():
 
     return response.json()['access_token']
 
-def build_game_library():
+def build_game_library(config):
     print("Retrieving game library...")
 
-    data = get_purchased_games()
+    data = get_purchased_games(config)
+    ignored_titles = config['ignored_titles']
     
     # Some games may not appear as "purchased" because they are, e.g., pack-ins (like Astro's Playroom).
     # Initialize the library with these games to make sure they're included in the asset gathering process.
@@ -195,36 +194,35 @@ def retrieve_game_icons(library):
             with open(output_file, 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
 
-def write_games_json(library):
-    print("Writing games.json...")
+def write_games_yaml(library):
+    print("Writing ../.local/games.yaml...")
 
     # Strip out the image URLs before we write to disk; the presence client doesn't need them
-    game_data = { 
-        'ps5': [{k: item[k] for k in item if k != "image"} for item in library['ps5'].values()],
-        'ps4': [{k: item[k] for k in item if k != "image"} for item in library['ps4'].values()]
-    }
+    game_data = \
+        [{k: item[k] for k in item if k != "image"} for item in library['ps5'].values()] + \
+        [{k: item[k] for k in item if k != "image"} for item in library['ps4'].values()]
 
-    with open('games.json', 'w') as games_file:
-        json.dump(game_data, games_file)
+    with open('../.local/games.yaml', 'w+') as games_file:
+        yaml.dump(game_data, games_file)
 
 def generate(args):
-    library = build_game_library()
+    config = load_config()
+    library = build_game_library(config)
 
     if not args.skip_icons:
         retrieve_game_icons(library)
 
-    write_games_json(library)
+    write_games_yaml(library)
 
 def login(args):
-    config = {}
-    with open("../.local/config.json", 'r') as f:
-        config = json.load(f)
+    config = load_config()
+    oauth_code = get_oauth_code(config["npsso"])
+    get_refresh_token(oauth_code, config)
+    save_config(config)
 
-        oauth_code = get_oauth_code(config["npsso"])
-        get_refresh_token(oauth_code, config)
-    
-    with open("../.local/config.json", 'w+') as f:
-        json.dump(config, f, ensure_ascii=False, indent=4)
+def push(args):
+    config = load_config()
+    push_assets(config)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -235,7 +233,7 @@ def main():
     generate_command.set_defaults(func=generate)
 
     push_command = subparsers.add_parser("push", help="Push assets to Discord")
-    push_command.set_defaults(func=push_assets)
+    push_command.set_defaults(func=push)
 
     login_command = subparsers.add_parser("login", help="Log in to PSN")
     login_command.set_defaults(func=login)

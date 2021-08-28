@@ -1,32 +1,27 @@
 #!/usr/bin/env python3
 # Adapted from https://github.com/Tustin/PlayStationDiscord-Games/blob/master/discord_push.py
-import json, base64
+import base64
+import yaml
 from discord_assets import AssetClient
 
-def push_assets(args):
-    config = {}
-    with open('../.local/config.json', 'r+') as f:
-        config = json.load(f)
-
-    with open('games.json') as games_file:  
-        game_data = json.load(games_file)
+def push_assets(config):
+    with open('../.local/games.yaml') as games_file:  
+        game_data = yaml.safe_load(games_file)
         if len(game_data) == 0:
             print('no games saved')
             exit(1)
         
+        supported_games = set(g['titleId'] for g in game_data)
         client = AssetClient(config['discordClientId'], config['discordToken'])
 
-        # sort all the supported games title ids from the games.json file 
-        supported_games_title_ids = set(n['titleId'] for n in (game_data['ps4'] + game_data['ps5']))
-
-        print(f'found {len(supported_games_title_ids)} supported games in games.json')
+        print(f'found {len(supported_games)} supported games in games.yaml')
 
         discord_assets = client.get_assets()
         discord_asset_names = set(n['name'] for n in discord_assets if n['name'] != 'ps5_main') # dont remove the main icon
         print(f'found {len(discord_assets)} discord assets')
         if len(discord_assets) > 0:
             # games that have a discord asset that are no longer supported by this repo
-            removed_games = [ i for i in discord_asset_names if i.upper() not in supported_games_title_ids ]
+            removed_games = [ i for i in discord_asset_names if i.upper() not in supported_games ]
             if len(removed_games) > 0:
                 print(f'removing {len(removed_games)} games')
                 for game in removed_games:
@@ -42,7 +37,7 @@ def push_assets(args):
             print('no discord assets found so none were removed')
 
         # games that are now supported that don't exist in the discord application
-        added_games = [ i for i in supported_games_title_ids if i.lower() not in discord_asset_names ]
+        added_games = [ i for i in supported_games if i.lower() not in discord_asset_names ]
         if len(added_games) > 0:
             print('adding %d games...' % len(added_games))
             for game in added_games:
