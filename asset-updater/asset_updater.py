@@ -6,23 +6,15 @@ import requests
 import shutil
 import sys
 import time
-import yaml
 
 from discord_push import push_assets
 from urllib.parse import urlparse, parse_qs
+from lib.files import load_config, save_config, save_game_data
 
 icon_dir = ".local/game_icons"
 ps_graph_api = "https://web.np.playstation.com/api/graphql/v1/op"
-
-# Anything we don't care to push assets for (e.g. streaming apps, artbooks, etc)
-# since the library page doesn't seem to let us filter out non-games and such.
-def load_config():
-    with open("../.local/config.yaml", 'r') as f:
-        return yaml.safe_load(f)
-
-def save_config(config):
-    with open("../.local/config.yaml", 'w+') as f:
-        yaml.dump(config, f)
+ps_oauth_api = "https://ca.account.sony.com/api/authz/v3/oauth"
+basic_auth_header = "Basic YWM4ZDE2MWEtZDk2Ni00NzI4LWIwZWEtZmZlYzIyZjY5ZWRjOkRFaXhFcVhYQ2RYZHdqMHY="
 
 def get_purchased_games(config):
     variables = {
@@ -87,7 +79,7 @@ def get_oauth_code(npsso):
 
     query_string = "&".join([f"{k}={v}" for k,v in params.items()])
 
-    response = requests.get(f"https://ca.account.sony.com/api/authz/v3/oauth/authorize?{query_string}", headers=headers, allow_redirects=False)
+    response = requests.get(f"{ps_oauth_api}/authorize?{query_string}", headers=headers, allow_redirects=False)
     return parse_qs(urlparse(response.headers.get('Location')).query)['code']
 
 def get_refresh_token(oauth_code, config):
@@ -109,11 +101,11 @@ def get_refresh_token(oauth_code, config):
     }
 
     headers = {
-        'authorization': 'Basic YWM4ZDE2MWEtZDk2Ni00NzI4LWIwZWEtZmZlYzIyZjY5ZWRjOkRFaXhFcVhYQ2RYZHdqMHY=',
+        'Authorization': basic_auth_header,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
-    response = requests.post("https://ca.account.sony.com/api/authz/v3/oauth/token", data=data, headers=headers, allow_redirects=False)
+    response = requests.post(f"{ps_oauth_api}/token", data=data, headers=headers, allow_redirects=False)
     j = response.json()
 
     config["refresh_token"] = j["refresh_token"]
@@ -129,10 +121,10 @@ def get_access_token(config):
     }
 
     auth_header = {
-        'Authorization': 'Basic YWM4ZDE2MWEtZDk2Ni00NzI4LWIwZWEtZmZlYzIyZjY5ZWRjOkRFaXhFcVhYQ2RYZHdqMHY='
+        'Authorization': basic_auth_header
     }
 
-    response = requests.post("https://ca.account.sony.com/api/authz/v3/oauth/token", data=data, headers=auth_header)
+    response = requests.post(f"{ps_oauth_api}/token", data=data, headers=auth_header)
 
     return response.json()['access_token']
 
@@ -195,15 +187,14 @@ def retrieve_game_icons(library):
                 shutil.copyfileobj(r.raw, f)
 
 def write_games_yaml(library):
-    print("Writing ../.local/games.yaml...")
+    print("Writing game data to disk...")
 
     # Strip out the image URLs before we write to disk; the presence client doesn't need them
     game_data = \
         [{k: item[k] for k in item if k != "image"} for item in library['ps5'].values()] + \
         [{k: item[k] for k in item if k != "image"} for item in library['ps4'].values()]
 
-    with open('../.local/games.yaml', 'w+') as games_file:
-        yaml.dump(game_data, games_file)
+    save_game_data(game_data)
 
 def generate(args):
     config = load_config()

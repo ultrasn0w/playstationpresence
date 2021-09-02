@@ -31,7 +31,7 @@ It's a bit of a process to get things off the ground, but after that maintenance
 
 There are two steps, first you need to get game icons in place:
 
-1. Clone the repo and `pip install -r requirements.txt` in the asset-updater sub-folder.
+1. Clone the repo and `pip install -r requirements.txt` to get all necessary dependencies.
 2. Create your own Discord app through their [developer portal](https://discord.com/developers/applications).
 Note that the name you choose here is what will show up as your primary status in your Discord status card, so
 you might want to pick something like "PlayStation".
@@ -49,10 +49,9 @@ want but the idea is that it should probably be some version of the PS5 logo.
 
 After all that's done, starting up playstationpresence is quite a bit easier:
 
-1. `pip install -r requirements.txt` in the playstationpresence sub-folder.
-2. Make sure your PSN token/ID and Discord app ID are set in the config file.
-3. Run it: `.\playstationpresence.py` (or `pythonw .\playstationpresence.py` to run in the background)
-4. If everything worked you should get a tray icon and a notification to let you know the app has started.
+1. Make sure your PSN token/ID and Discord app ID are set in the config file.
+2. Run it: `.\playstationpresence.py` (or `pythonw .\playstationpresence.py` to run in the background)
+3. If everything worked you should get a tray icon and a notification to let you know the app has started.
 To quit the app, right click the tray icon and choose "Quit".
 
 # Other notes

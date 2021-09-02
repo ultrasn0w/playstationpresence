@@ -3,9 +3,9 @@ import asyncio
 import os
 import time
 import winstray
-import yaml
 from psnawp_api import psnawp
 from pypresence import Presence
+from lib.files import load_config, load_game_data
 from winstray import MenuItem as item
 from winstray._base import Icon
 from winstray._win32 import loadIcon
@@ -38,7 +38,8 @@ def updateStatus(rpc: Presence, tray_icon: Icon, state: str, psnid: str, large_i
 
 def mainloop(icon: Icon):
     old_info: dict = {}
-    config: dict = yaml.safe_load(open("../.local/config.yaml", "r"))
+    config: dict = load_config()
+    supported_games: set[str] = load_game_data()
     npsso = config['npsso']
     psnid = config['PSNID']
     ps = psnawp.PSNAWP(npsso)
@@ -63,7 +64,8 @@ def mainloop(icon: Icon):
                     updateStatus(rpc, icon, psnid, "Not in game", "ps5_main", "Homescreen", "Not in game")
                 else:
                     game: dict[str, str] = game_info[0]
-                    updateStatus(rpc, icon, game['titleName'], psnid, game['npTitleId'].lower(), game['titleName'], f"Playing {game['titleName']}")
+                    large_icon = game['npTitleId'].lower() if game['npTitleId'] in supported_games else "ps5_main"
+                    updateStatus(rpc, icon, game['titleName'], psnid, large_icon, game['titleName'], f"Playing {game['titleName']}")
 
         exit_event.wait(20) #Adjust this to be higher if you get ratelimited
         old_info = platform_info
