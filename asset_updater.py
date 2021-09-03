@@ -4,12 +4,25 @@ import os
 import requests
 import shutil
 import sys
-
+import time
+from datetime import timedelta
 from discord_assets.push import push_assets
 from lib.files import load_config, load_game_data, save_config, save_game_data
 from lib.psnclient import PSNClient
 
 icon_dir = ".local/game_icons"
+
+def get_refresh_token(config):
+    client = PSNClient(config['npsso'])
+    oauth_code = client.get_oauth_code()
+    token = client.get_refresh_token(oauth_code)
+    config['refresh_token'] = token['refresh_token']
+    config['refresh_token_expiration'] = token['refresh_token_expiration']
+    save_config(config)
+
+def refresh_token_is_expiring(config):
+    delta = timedelta(seconds=(config['refresh_token_expiration'] - time.time()))
+    return delta < timedelta(days=7)
 
 def build_game_library(config):
     print("Retrieving game library...")
@@ -84,6 +97,11 @@ def write_games_yaml(library):
 
 def generate(args):
     config = load_config()
+
+    if refresh_token_is_expiring(config):
+        print("Refresh token is approaching expiration; getting a new token")
+        get_refresh_token(config)
+
     library = build_game_library(config)
 
     if not args.skip_icons:
@@ -93,12 +111,7 @@ def generate(args):
 
 def login(args):
     config = load_config()
-    client = PSNClient(config['npsso'])
-    oauth_code = client.get_oauth_code()
-    token = client.get_refresh_token(oauth_code)
-    config['refresh_token'] = token['refresh_token']
-    config['refresh_token_expiration'] = token['refresh_token_expiration']
-    save_config(config)
+    get_refresh_token(config)
 
 def push(args):
     config = load_config()
