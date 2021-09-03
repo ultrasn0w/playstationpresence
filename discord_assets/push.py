@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
 # Adapted from https://github.com/Tustin/PlayStationDiscord-Games/blob/master/discord_push.py
 import base64
-from discord_assets import AssetClient
-from lib.files import load_game_data
+from discord_assets.client import AssetClient
 
-def push_assets(config):
-    game_data = load_game_data()
+def push_assets(config, game_data):
     if len(game_data) == 0:
         print('no games saved')
         exit(1)
