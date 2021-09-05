@@ -1,7 +1,7 @@
 import yaml
 
 _CONFIG_PATH = ".local/config.yaml"
-_GAMES_PATH = ".local/.config.yaml"
+_GAMES_PATH = ".local/games.yaml"
 
 def load_game_data():
     with open(_GAMES_PATH) as games_file:  

@@ -88,10 +88,10 @@ def retrieve_game_icons(library):
 def write_games_yaml(library):
     print("Writing game data to disk...")
 
-    # Strip out the image URLs before we write to disk; the presence client doesn't need them
+    # Just save game IDs for the client to use for looking up what we support
     game_data = \
-        [{k: item[k] for k in item if k != "image"} for item in library['ps5'].values()] + \
-        [{k: item[k] for k in item if k != "image"} for item in library['ps4'].values()]
+        [item['titleId'] for item in library['ps5'].values()] + \
+        [item['titleId'] for item in library['ps4'].values()]
 
     save_game_data(game_data)
 
