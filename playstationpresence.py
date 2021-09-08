@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import asyncio
 import os
+import requests
 import time
 import winstray
 from psnawp_api import psnawp
@@ -49,23 +50,32 @@ def mainloop(icon: Icon):
     rpc = discordrpc(config['discordClientId'])
     
     while not exit_event.is_set():
-        user_online_id = ps.user(online_id=psnid)
-        mainpresence: dict = user_online_id.get_presence()
-        platform_info: dict = mainpresence['primaryPlatformInfo']
-        game_info: list[dict] = mainpresence.get('gameTitleInfoList', None)
-        
-        if platform_info['onlineStatus'] == "offline" and not old_info.get('onlineStatus', "") == "offline":
-            clearStatus(rpc, icon)
-        else: 
-            if (old_info == platform_info):
-                pass
-            else:
-                if (game_info == None):
-                    updateStatus(rpc, icon, psnid, "Not in game", "ps5_main", "Homescreen", "Not in game")
+        mainpresence: dict = None
+        user_online_id = None
+
+        try:
+            user_online_id = ps.user(online_id=psnid)
+            mainpresence = user_online_id.get_presence()
+        except requests.exceptions.ConnectionError as e:
+            print("Error when trying to read presence")
+            print(e)
+
+        if user_online_id is not None and mainpresence is not None:
+            platform_info: dict = mainpresence['primaryPlatformInfo']
+            game_info: list[dict] = mainpresence.get('gameTitleInfoList', None)
+            
+            if platform_info['onlineStatus'] == "offline" and not old_info.get('onlineStatus', "") == "offline":
+                clearStatus(rpc, icon)
+            else: 
+                if (old_info == platform_info):
+                    pass
                 else:
-                    game: dict[str, str] = game_info[0]
-                    large_icon = game['npTitleId'].lower() if game['npTitleId'] in supported_games else "ps5_main"
-                    updateStatus(rpc, icon, game['titleName'], psnid, large_icon, game['titleName'], f"Playing {game['titleName']}")
+                    if (game_info == None):
+                        updateStatus(rpc, icon, psnid, "Not in game", "ps5_main", "Homescreen", "Not in game")
+                    else:
+                        game: dict[str, str] = game_info[0]
+                        large_icon = game['npTitleId'].lower() if game['npTitleId'] in supported_games else "ps5_main"
+                        updateStatus(rpc, icon, game['titleName'], psnid, large_icon, game['titleName'], f"Playing {game['titleName']}")
 
         exit_event.wait(20) #Adjust this to be higher if you get ratelimited
         old_info = platform_info
