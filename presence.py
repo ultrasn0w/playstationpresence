@@ -3,7 +3,6 @@ import os
 
 from playstationpresence.playstationpresence import PlaystationPresence
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-tray-icon", help="Don't create a tray icon", action="store_true")
