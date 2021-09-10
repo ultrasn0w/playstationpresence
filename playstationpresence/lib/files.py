@@ -1,20 +1,28 @@
 import yaml
 
-_CONFIG_PATH = ".local/config.yaml"
-_GAMES_PATH = ".local/games.yaml"
+__CONFIG_PATH = ".local/config.yaml"
+__GAMES_PATH = ".local/games.yaml"
+__IGNORED_TITLES_PATH = ".local/ignored_titles.yaml"
 
-def load_game_data():
-    with open(_GAMES_PATH) as games_file:  
-        return yaml.safe_load(games_file)
-
-def save_game_data(game_data):
-    with open(_GAMES_PATH, 'w+') as games_file:
-        yaml.dump(game_data, games_file)
-
-def load_config():
-    with open(_CONFIG_PATH, "r") as f:
+def __read_file(file):
+    with open(file, "r") as f:
         return yaml.safe_load(f)
 
+def __write_file(data, file):
+    with open(file, "w+") as f:
+        yaml.dump(data, f)
+
+def load_game_data():
+    return __read_file(__GAMES_PATH)
+
+def save_game_data(game_data):
+    __write_file(game_data, __GAMES_PATH)
+
+def load_config():
+    return __read_file(__CONFIG_PATH)
+
 def save_config(config):
-    with open(_CONFIG_PATH, 'w+') as f:
-        yaml.dump(config, f)
+    __write_file(config, __CONFIG_PATH)
+
+def load_ignored_titles():
+    return __read_file(__IGNORED_TITLES_PATH)

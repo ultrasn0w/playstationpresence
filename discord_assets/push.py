@@ -2,12 +2,13 @@
 import base64
 from discord_assets.client import AssetClient
 
-def push_assets(config, game_data):
-    if len(game_data) == 0:
+icon_dir = ".local/game_icons"
+
+def push_assets(config, supported_games):
+    if len(supported_games) == 0:
         print('no games saved')
         exit(1)
     
-    supported_games = set(g['titleId'] for g in game_data)
     client = AssetClient(config['discordClientId'], config['discordToken'])
 
     print(f'found {len(supported_games)} supported games in games.yaml')
@@ -19,7 +20,7 @@ def push_assets(config, game_data):
         # games that have a discord asset that are no longer supported by this repo
         removed_games = [ i for i in discord_asset_names if i.upper() not in supported_games ]
         if len(removed_games) > 0:
-            print(f'removing {len(removed_games)} games')
+            print(f'removing {len(removed_games)} game(s)')
             for game in removed_games:
                 asset_id = next(i for i in discord_assets if i['name'] == game)['id']
                 try:
@@ -35,9 +36,9 @@ def push_assets(config, game_data):
     # games that are now supported that don't exist in the discord application
     added_games = [ i for i in supported_games if i.lower() not in discord_asset_names ]
     if len(added_games) > 0:
-        print('adding %d games...' % len(added_games))
+        print('adding %d game(s)...' % len(added_games))
         for game in added_games:
-            with open(f'game_icons/{game}.png', "rb") as image_file:
+            with open(f'{icon_dir}/{game}.png', "rb") as image_file:
                 try:
                     encoded_string = base64.b64encode(image_file.read())
                     client.add_asset(game, f'data:image/png;base64,{encoded_string.decode("utf-8")}')

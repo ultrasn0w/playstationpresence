@@ -7,7 +7,7 @@ import sys
 import time
 from datetime import timedelta
 from discord_assets.push import push_assets
-from playstationpresence.lib.files import load_config, load_game_data, save_config, save_game_data
+from playstationpresence.lib.files import load_config, load_game_data, load_ignored_titles, save_config, save_game_data
 from playstationpresence.lib.psnclient import PSNClient
 
 icon_dir = ".local/game_icons"
@@ -31,7 +31,7 @@ def build_game_library(config):
     data = client.get_purchased_games()
 
     # These are the titles for which we will not be uploading icons
-    ignored_titles = config['ignored_titles']
+    ignored_titles = load_ignored_titles()
     
     # Some games may not appear as "purchased" because they are, e.g., pack-ins (like Astro's Playroom).
     # Initialize the library with these games to make sure they're included in the asset gathering process.
@@ -85,8 +85,12 @@ def retrieve_game_icons(library):
             with open(output_file, 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
 
-def write_games_yaml(library):
+def write_games_yaml(library, verbose):
     print("Writing game data to disk...")
+
+    if verbose:
+        for game in { **library['ps4'], **library['ps5'] }.values():
+            print(f"{game['name']} ({game['titleId']})")
 
     # Just save game IDs for the client to use for looking up what we support
     game_data = \
@@ -107,7 +111,7 @@ def generate(args):
     if not args.skip_icons:
         retrieve_game_icons(library)
 
-    write_games_yaml(library)
+    write_games_yaml(library, args.verbose)
 
 def login(args):
     config = load_config()
@@ -124,6 +128,7 @@ def main():
 
     generate_command = subparsers.add_parser("generate", help="Build library, download icons, and write games.json")
     generate_command.add_argument("--skip-icons", help="Skip icon download step", action="store_true")
+    generate_command.add_argument("--verbose", "-v", help="Print list of games found to the console", action="store_true")
     generate_command.set_defaults(func=generate)
 
     push_command = subparsers.add_parser("push", help="Push assets to Discord")
