@@ -7,8 +7,8 @@ import sys
 import time
 from datetime import timedelta
 from discord_assets.push import push_assets
-from lib.files import load_config, load_game_data, save_config, save_game_data
-from lib.psnclient import PSNClient
+from playstationpresence.lib.files import load_config, load_game_data, save_config, save_game_data
+from playstationpresence.lib.psnclient import PSNClient
 
 icon_dir = ".local/game_icons"
 

@@ -13,8 +13,10 @@ Many thanks to these developers for sharing their work!
 
 There are a couple of major changes at the moment:
 
-- Support for non-Windows platforms is removed. I don't have the hardware to support this and wouldn't use
-it myself, so in the interest of reducing code complexity and size it has been dropped.
+- Non-Windows platforms are not explicitly supported. I don't have the hardware to support this and wouldn't 
+use it myself, but the code is structured such that you can (in theory)  run it on a non-Windows platform in 
+a "reduced functionality" state. Specifically, you would need to run the app with the `--no-tray-icon` flag,
+which (as the name suggests), would mean that you will not have a tray icon or system notifications.
 - PS4 is not supported. This is probably not as big of a lift to keep intact, but again: I don't have a PS4
 so I'd rather just set it aside.
 - The generation and uploading of game icons to Discord has been greatly overhauled. Instead of bulding out
@@ -52,7 +54,9 @@ want but the idea is that it should probably be some version of the PS5 logo.
 After all that's done, starting up playstationpresence is quite a bit easier:
 
 1. Make sure your PSN token/ID and Discord app ID are set in the config file.
-2. Run it: `.\playstationpresence.py` (or `pythonw .\playstationpresence.py` to run in the background)
+2. Run it: `.\presence.py` (or `pythonw .\presence.py` to run in the background on Windows). For non-Windows
+systems you must also provide the `--no-system-tray` flag; you can also use this flag on Windows if you'd
+prefer not to have the system tray icon/notifications.
 3. If everything worked you should get a tray icon and a notification to let you know the app has started.
 To quit the app, right click the tray icon and choose "Quit".
 
