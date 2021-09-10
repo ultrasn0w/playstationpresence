@@ -1,3 +1,8 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from playstationpresence.playstationpresence import PlaystationPresence
+
 def rpc_retry(func):
     def wrapper(*args):
         try:
@@ -8,7 +13,7 @@ def rpc_retry(func):
 
             # Seems like the RPC connection can go stale or some such
             # Create a new instance on failure and retry once
-            instance = args[0]
+            instance: PlaystationPresence = args[0]
             instance.initRpc()
 
             try:

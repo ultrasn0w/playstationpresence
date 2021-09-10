@@ -31,7 +31,11 @@ def build_game_library(config):
     data = client.get_purchased_games()
 
     # These are the titles for which we will not be uploading icons
-    ignored_titles = load_ignored_titles()
+    # Note: this file may not exist
+    try:
+        ignored_titles = load_ignored_titles()
+    except:
+        ignored_titles = set()
     
     # Some games may not appear as "purchased" because they are, e.g., pack-ins (like Astro's Playroom).
     # Initialize the library with these games to make sure they're included in the asset gathering process.

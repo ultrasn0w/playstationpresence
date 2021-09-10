@@ -67,6 +67,6 @@ you purchase a new game. Then you'll want to repeat at least the generate/push s
 and push them to your app. If your tokens haven't yet expired then you shouldn't need the login step.
 
 If you have games or apps that you do NOT want to have icons, you can exclude them by adding them to
-the `ignored_titles` list in your `config.yaml` file (see the sample). If you launch these titles
+an `ignored_titles.yaml` file in the `.local/` directory (see the sample). If you launch these titles
 while playstationpresence is running then the text of your presence will be the game/app name and
 the icon will simply be set to whatever your default `ps5_main` icon is.

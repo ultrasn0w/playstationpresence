@@ -1,8 +1,4 @@
 PSNID: <your-psn-username>
 discordClientId: <your-discord-app-id>
 discordToken: <your-discord-token>
-ignored_titles:
-- title
-- ids
-- here
 npsso: <your-sony-sso-token>
