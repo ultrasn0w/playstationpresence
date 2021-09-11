@@ -70,20 +70,21 @@ class PlaystationPresence:
                 platform_info: dict = mainpresence['primaryPlatformInfo']
                 game_info: list[dict] = mainpresence.get('gameTitleInfoList', None)
                 
-                if platform_info['onlineStatus'] == "offline" and not self.old_info.get('onlineStatus', "") == "offline":
-                    self.clearStatus()
-                else: 
-                    if (self.old_info == platform_info):
-                        pass
-                    else:
-                        if (game_info == None):
+                if platform_info['onlineStatus'] == "offline":
+                    if self.old_info != None:
+                        self.clearStatus()
+                        self.old_info = None
+                else:
+                    if game_info == None:
+                        if self.old_info.get('npTitleId', "") != None:
                             self.updateStatus("Not in game", "ps5_main", "Homescreen", "Not in game")
-                        else:
-                            game: dict[str, str] = game_info[0]
-                            large_icon = game['npTitleId'].lower() if game['npTitleId'] in self.supported_games else "ps5_main"
-                            self.updateStatus(game['titleName'], large_icon, game['titleName'], f"Playing {game['titleName']}")
+                            self.old_info = { 'npTitleId': None }
+                    elif self.old_info.get('npTitleId', "") != game_info[0]['npTitleId']:
+                        game: dict[str, str] = game_info[0]
+                        large_icon = game['npTitleId'].lower() if game['npTitleId'] in self.supported_games else "ps5_main"
+                        self.updateStatus(game['titleName'], large_icon, game['titleName'], f"Playing {game['titleName']}")
+                        self.old_info = game
 
             self.exit_event.wait(20) #Adjust this to be higher if you get ratelimited
-            self.old_info = platform_info
 
         self.rpc.close()
