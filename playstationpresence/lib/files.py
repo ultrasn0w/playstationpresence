@@ -1,7 +1,13 @@
+import sys
 import yaml
 
-__CONFIG_PATH = ".local/config.yaml"
-__GAMES_PATH = ".local/games.yaml"
+if not getattr(sys, 'frozen', False):
+    __CONFIG_PATH = ".local/config.yaml"
+    __GAMES_PATH = ".local/games.yaml"
+else:
+    __CONFIG_PATH = "config.yaml"
+    __GAMES_PATH = "games.yaml"
+
 __IGNORED_TITLES_PATH = ".local/ignored_titles.yaml"
 
 def __read_file(file):

@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from playstationpresence.playstationpresence import PlaystationPresence
 
@@ -16,7 +17,9 @@ def main():
         from winstray import MenuItem as item
         from winstray._win32 import Icon, loadIcon
 
-        image = loadIcon(os.path.join(os.path.dirname(__file__), 'logo.ico'))
+        root_dir = __file__ if not getattr(sys, 'frozen', False) else sys.argv[0]
+
+        image = loadIcon(os.path.join(os.path.dirname(root_dir), 'logo.ico'))
         menu = [item('Quit', pspresence.quit)]
 
         icon: Icon = Icon("playstationpresence", image, "playstationpresence", menu)
