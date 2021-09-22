@@ -1,4 +1,4 @@
-PSNID: <your-psn-username>
+psnid: <your-psn-username>
 discordClientId: <your-discord-app-id>
 discordToken: <your-discord-token>
 npsso: <your-sony-sso-token>
