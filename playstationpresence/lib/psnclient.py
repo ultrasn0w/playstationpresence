@@ -3,6 +3,7 @@ import requests
 import time
 from urllib.parse import parse_qs, urlparse
 
+
 class PSNClient():
     _PS_GRAPH_API = "https://web.np.playstation.com/api/graphql/v1/op"
     _PS_OAUTH_API = "https://ca.account.sony.com/api/authz/v3/oauth"
@@ -14,56 +15,56 @@ class PSNClient():
 
         self.npsso = npsso
         self.refresh_token = refresh_token
-    
+
     def get_oauth_code(self):
         params = {
-            'access_type' : 'offline',
-            'app_context' : 'inapp_ios',
-            'auth_ver' : 'v3',
-            'cid' : '60351282-8C5F-4D5E-9033-E48FEA973E11',
-            'client_id' : 'ac8d161a-d966-4728-b0ea-ffec22f69edc',
-            'darkmode' : 'true',
-            'device_base_font_size' : 10,
-            'device_profile' : 'mobile',
-            'duid' : '0000000d0004008088347AA0C79542D3B656EBB51CE3EBE1',
-            'elements_visibility' : 'no_aclink',
-            'no_captcha' : 'true',
-            'redirect_uri' : 'com.playstation.PlayStationApp://redirect',
-            'response_type' : 'code',
-            'scope' : 'psn:mobile.v1 psn:clientapp',
-            'service_entity' : 'urn:service-entity:psn',
-            'service_logo' : 'ps',
-            'smcid' : 'psapp:settings-entrance',
-            'support_scheme' : 'sneiprls',
-            'token_format' : 'jwt',
-            'ui' : 'pr'
+            'access_type': 'offline',
+            'app_context': 'inapp_ios',
+            'auth_ver': 'v3',
+            'cid': '60351282-8C5F-4D5E-9033-E48FEA973E11',
+            'client_id': 'ac8d161a-d966-4728-b0ea-ffec22f69edc',
+            'darkmode': 'true',
+            'device_base_font_size': 10,
+            'device_profile': 'mobile',
+            'duid': '0000000d0004008088347AA0C79542D3B656EBB51CE3EBE1',
+            'elements_visibility': 'no_aclink',
+            'no_captcha': 'true',
+            'redirect_uri': 'com.playstation.PlayStationApp://redirect',
+            'response_type': 'code',
+            'scope': 'psn:mobile.v1 psn:clientapp',
+            'service_entity': 'urn:service-entity:psn',
+            'service_logo': 'ps',
+            'smcid': 'psapp:settings-entrance',
+            'support_scheme': 'sneiprls',
+            'token_format': 'jwt',
+            'ui': 'pr'
         }
 
         headers = {
             'cookie': f'npsso={self.npsso}'
         }
 
-        query_string = "&".join([f"{k}={v}" for k,v in params.items()])
+        query_string = "&".join([f"{k}={v}" for k, v in params.items()])
 
         response = requests.get(f"{self._PS_OAUTH_API}/authorize?{query_string}", headers=headers, allow_redirects=False)
         return parse_qs(urlparse(response.headers.get('Location')).query)['code']
 
     def get_refresh_token(self, oauth_code):
         data = {
-            'smcid' : 'psapp%3Asettings-entrance',
-            'access_type' : 'offline',
-            'code' : oauth_code,
-            'service_logo' : 'ps',
-            'ui' : 'pr',
-            'elements_visibility' : 'no_aclink',
-            'redirect_uri' : 'com.playstation.PlayStationApp://redirect',
-            'support_scheme' : 'sneiprls',
-            'grant_type' : 'authorization_code',
-            'darkmode' : 'true',
-            'device_base_font_size' : 10,
-            'device_profile' : 'mobile',
-            'app_context' : 'inapp_ios',
-            'token_format' : 'jwt'
+            'smcid': 'psapp%3Asettings-entrance',
+            'access_type': 'offline',
+            'code': oauth_code,
+            'service_logo': 'ps',
+            'ui': 'pr',
+            'elements_visibility': 'no_aclink',
+            'redirect_uri': 'com.playstation.PlayStationApp://redirect',
+            'support_scheme': 'sneiprls',
+            'grant_type': 'authorization_code',
+            'darkmode': 'true',
+            'device_base_font_size': 10,
+            'device_profile': 'mobile',
+            'app_context': 'inapp_ios',
+            'token_format': 'jwt'
         }
 
         headers = {
@@ -80,7 +81,7 @@ class PSNClient():
             'refresh_token': j['refresh_token'],
             'refresh_token_expiration': time.time() + j['refresh_token_expires_in']
         }
-    
+
     def get_access_token(self):
         data = {
             'refresh_token': self.refresh_token,
@@ -100,7 +101,7 @@ class PSNClient():
     def get_purchased_games(self):
         variables = {
             "isActive": True,
-            "platform": [ "ps4","ps5" ],
+            "platform": ["ps4", "ps5"],
             "size": 50,
             "start": 0,
             "sortBy": "productName",

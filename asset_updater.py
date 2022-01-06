@@ -7,7 +7,7 @@ import sys
 import time
 from datetime import timedelta
 from discord_assets.push import push_assets
-from playstationpresence.lib.files import load_config, load_game_data, load_game_icons, load_ignored_titles, save_config, save_game_data, __ICON_DIR as icon_dir
+from playstationpresence.lib.files import load_config, load_game_icons, load_ignored_titles, save_config, save_game_data, __ICON_DIR as icon_dir
 from playstationpresence.lib.psnclient import PSNClient
 
 
@@ -92,6 +92,21 @@ def retrieve_game_icons(library):
                 shutil.copyfileobj(r.raw, f)
 
 
+def add_game_icon(gameid: str, iconurl: str):
+    if gameid == None or gameid == "" or iconurl == None or iconurl == "":
+        return
+
+    output_file = f"{icon_dir}/{gameid}.png"
+
+    if os.path.exists(output_file):
+        return
+
+    print(f"Downloading image for {gameid}")
+    with requests.get(iconurl, stream=True) as r:
+        with open(output_file, 'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+
+
 def write_games_yaml(library, verbose):
     print("Writing game data to disk...")
 
@@ -129,8 +144,12 @@ def login(args):
 
 def push(args):
     config = load_config()
+    # Read existing game icon files
     game_data = load_game_icons()
+    # Refresh discord assets
     push_assets(config, game_data)
+    # Refresh game database
+    save_game_data(game_data)
 
 
 def main():

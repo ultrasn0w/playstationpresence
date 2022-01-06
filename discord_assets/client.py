@@ -1,6 +1,7 @@
 # Adapted from https://github.com/Tustin/PlayStationDiscord-Games/blob/master/discord_assets.py
 import requests
 
+
 class AssetClient:
     _API_ENDPOINT = 'https://discordapp.com/api/v6'
 

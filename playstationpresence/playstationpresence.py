@@ -3,7 +3,8 @@ import asyncio
 import time
 from psnawp_api import psnawp
 from pypresence import Presence
-from playstationpresence.lib.files import load_config, load_game_data
+from asset_updater import add_game_icon
+from playstationpresence.lib.files import load_config, load_game_data, load_game_icons
 from playstationpresence.lib.notifiable import Notifiable
 from playstationpresence.lib.rpc_retry import rpc_retry
 from requests.exceptions import *
@@ -18,6 +19,7 @@ class PlaystationPresence:
         self.old_info: dict = {'onlineStatus': None, 'titleId': None}
         self.config: dict = load_config()
         self.supported_games: set[str] = load_game_data()
+        self.game_icons: set[str] = load_game_icons()
         self.psapi = psnawp.PSNAWP(self.config['npsso'])
         self.psnid = self.config['PSNID']
         self.initRpc()
@@ -82,10 +84,19 @@ class PlaystationPresence:
             if game['npTitleId'] in self.supported_games:
                 large_icon = game['npTitleId'].lower()
             else:
+                # Game not known
+                self.notify("Game not in library, checking for icon")
+                # Check if icon exists
+                if game['npTitleId'] in self.game_icons:
+                    self.notify("Game icon found\nConsider pushing new discord assets")
+                else:
+                    # Get icon
+                    add_game_icon(game['npTitleId'], game['npTitleIconUrl'])
+                    self.notify("Reloading icons")
+                    self.game_icons = load_game_icons()
                 large_icon = "ps5_main"
             # Update status
-            self.updateStatus(
-                True, game['titleName'], large_icon, f"Playing on {game['launchPlatform']}")
+            self.updateStatus(True, game['titleName'], large_icon, f"Playing on {game['launchPlatform']}")
             self.old_info = {'onlineStatus': onlineStatus, 'titleId': game['npTitleId']}
 
     def mainloop(self, notifier: Notifiable):
@@ -101,7 +112,7 @@ class PlaystationPresence:
                 user_online_id = self.psapi.user(online_id=self.psnid)
                 mainpresence = user_online_id.get_presence()
                 # Uncomment for debug info about currently running game
-                # print(mainpresence)
+                print(mainpresence)
             except (ConnectionError, HTTPError) as e:
                 print("Error when trying to read presence")
                 print(e)

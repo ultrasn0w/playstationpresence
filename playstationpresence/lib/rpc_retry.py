@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from playstationpresence.playstationpresence import PlaystationPresence
 
+
 def rpc_retry(func):
     def wrapper(*args):
         try:
@@ -23,5 +24,5 @@ def rpc_retry(func):
                 print(e)
 
                 instance.quit()
-    
+
     return wrapper
