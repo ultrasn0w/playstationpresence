@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import asyncio
-import time
 from psnawp_api import psnawp
 from pypresence import Presence
 from playstationpresence.lib.files import load_config, load_game_data
@@ -46,8 +45,7 @@ class PlaystationPresence:
 
     @rpc_retry
     def updateStatus(self, state: str, large_image: str, large_text: str, tray_tooltip: str):
-        start_time = int(time.time())
-        self.rpc.update(state=state, start=start_time, small_image="ps5_main", small_text=self.psnid, large_image=large_image, large_text=large_text)
+        self.rpc.update(state=state, small_image="ps5_main", small_text=self.psnid, large_image=large_image, large_text=large_text)
         self.notify(f"Status changed to {tray_tooltip}")
 
     def processPresenceInfo(self, mainpresence: dict):
@@ -83,6 +81,8 @@ class PlaystationPresence:
             try:
                 user_online_id = self.psapi.user(online_id=self.psnid)
                 mainpresence = user_online_id.get_presence()
+                # Uncomment for debug info about currently running game
+                #print(mainpresence)
             except (ConnectionError, HTTPError) as e:
                 print("Error when trying to read presence")
                 print(e)
