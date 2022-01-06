@@ -1,8 +1,7 @@
 # Adapted from https://github.com/Tustin/PlayStationDiscord-Games/blob/master/discord_push.py
 import base64
 from discord_assets.client import AssetClient
-
-icon_dir = ".local/game_icons"
+from playstationpresence.lib.files import __ICON_DIR as icon_dir
 
 def push_assets(config, supported_games):
     if len(supported_games) == 0:

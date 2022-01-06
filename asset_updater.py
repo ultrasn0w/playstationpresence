@@ -7,10 +7,9 @@ import sys
 import time
 from datetime import timedelta
 from discord_assets.push import push_assets
-from playstationpresence.lib.files import load_config, load_game_data, load_ignored_titles, save_config, save_game_data
+from playstationpresence.lib.files import load_config, load_game_data, load_game_icons, load_ignored_titles, save_config, save_game_data, __ICON_DIR as icon_dir
 from playstationpresence.lib.psnclient import PSNClient
 
-icon_dir = ".local/game_icons"
 
 def get_refresh_token(config):
     client = PSNClient(config['npsso'])
@@ -20,9 +19,11 @@ def get_refresh_token(config):
     config['refresh_token_expiration'] = token['refresh_token_expiration']
     save_config(config)
 
+
 def refresh_token_is_expiring(config):
     delta = timedelta(seconds=(config['refresh_token_expiration'] - time.time()))
     return delta < timedelta(days=7)
+
 
 def build_game_library(config):
     print("Retrieving game library...")
@@ -36,7 +37,7 @@ def build_game_library(config):
         ignored_titles = load_ignored_titles()
     except:
         ignored_titles = set()
-    
+
     # Some games may not appear as "purchased" because they are, e.g., pack-ins (like Astro's Playroom).
     # Initialize the library with these games to make sure they're included in the asset gathering process.
     library = {
@@ -47,7 +48,7 @@ def build_game_library(config):
                 "image": "https://image.api.playstation.com/vulcan/ap/rnd/202010/2012/T3h5aafdjR8k7GJAG82832De.png"
             }
         },
-        "ps4": { }
+        "ps4": {}
     }
 
     for game in data['data']['purchasedTitlesRetrieve']['games']:
@@ -70,30 +71,32 @@ def build_game_library(config):
         }
 
     print(f"Found {len(library['ps4']) + len(library['ps5'])} games in library")
-    
+
     return library
-    
+
+
 def retrieve_game_icons(library):
     if len(library['ps4']) == 0 and len(library['ps5']) == 0:
         return
 
     if os.path.exists(icon_dir):
         shutil.rmtree(icon_dir)
-		
+
     os.mkdir(icon_dir)
 
-    for game in { **library['ps4'], **library['ps5'] }.values():
+    for game in {**library['ps4'], **library['ps5']}.values():
         print(f"Downloading image for {game['name']} ({game['titleId']})")
         output_file = f"{icon_dir}/{game['titleId']}.png"
         with requests.get(game['image'], stream=True) as r:
             with open(output_file, 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
 
+
 def write_games_yaml(library, verbose):
     print("Writing game data to disk...")
 
     if verbose:
-        for game in { **library['ps4'], **library['ps5'] }.values():
+        for game in {**library['ps4'], **library['ps5']}.values():
             print(f"{game['name']} ({game['titleId']})")
 
     # Just save game IDs for the client to use for looking up what we support
@@ -102,6 +105,7 @@ def write_games_yaml(library, verbose):
         [item['titleId'] for item in library['ps4'].values()]
 
     save_game_data(game_data)
+
 
 def generate(args):
     config = load_config()
@@ -117,14 +121,17 @@ def generate(args):
 
     write_games_yaml(library, args.verbose)
 
+
 def login(args):
     config = load_config()
     get_refresh_token(config)
 
+
 def push(args):
     config = load_config()
-    game_data = load_game_data()
+    game_data = load_game_icons()
     push_assets(config, game_data)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -144,9 +151,10 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         return
-    
+
     args = parser.parse_args()
     args.func(args)
+
 
 if __name__ == "__main__":
     main()
