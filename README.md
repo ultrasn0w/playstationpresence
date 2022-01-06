@@ -1,12 +1,12 @@
 # playstationpresence
 
-This is a fork of [playstationpresence](https://github.com/cadewey/playstationpresence), which itself is a fork of the original [playstationpresence](https://github.com/elsorino/playstationpresence) and a fork of the tooling from [PlayStationDiscord-Games](https://github.com/Tustin/PlayStationDiscord-Games).
+This is a fork of [playstationpresence](https://github.com/cadewey/playstationpresence), which itself is a fork of the original [playstationpresence](https://github.com/elsorino/playstationpresence) and the tooling from [PlayStationDiscord-Games](https://github.com/Tustin/PlayStationDiscord-Games).
 
 So since this is a fork of a fork, I copied over the information of the original projects here:
 
 - Original [playstationpresence](https://github.com/elsorino/playstationpresence), a python
 app that syncs your PlayStation game status with Discord
-- A fork of the tooling from [PlayStationDiscord-Games](https://github.com/Tustin/PlayStationDiscord-Games),
+- Tooling from [PlayStationDiscord-Games](https://github.com/Tustin/PlayStationDiscord-Games),
 which is used to collect game icons and push them to Discord as app assets
 
 # Differences and why I forked a fork
