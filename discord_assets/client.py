@@ -3,7 +3,7 @@ import requests
 
 
 class AssetClient:
-    _API_ENDPOINT = 'https://discordapp.com/api/v6'
+    _API_ENDPOINT = 'https://discordapp.com/api/v9'
 
     def __init__(self, discordClientId, discordToken):
         self.clientId = discordClientId

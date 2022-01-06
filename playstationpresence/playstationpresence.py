@@ -119,7 +119,7 @@ class PlaystationPresence:
 
             self.processPresenceInfo(mainpresence)
             # Adjust this to be higher if you get ratelimited
-            self.exit_event.wait(20)
+            self.exit_event.wait(30)
 
         self.clearStatus()
         self.rpc.close()
