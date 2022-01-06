@@ -88,7 +88,7 @@ class PlaystationPresence:
                 self.notify("Game not in library, checking for icon")
                 # Check if icon exists
                 if game['npTitleId'] in self.game_icons:
-                    self.notify("Game icon found\nConsider pushing new discord assets")
+                    self.notify("Game icon found\CONSIDER PUSHING NEW DISCORD ASSETS")
                 else:
                     # Get icon
                     add_game_icon(game['npTitleId'], game['npTitleIconUrl'])
@@ -112,7 +112,7 @@ class PlaystationPresence:
                 user_online_id = self.psapi.user(online_id=self.psnid)
                 mainpresence = user_online_id.get_presence()
                 # Uncomment for debug info about currently running game
-                print(mainpresence)
+                #print(mainpresence)
             except (ConnectionError, HTTPError) as e:
                 print("Error when trying to read presence")
                 print(e)
